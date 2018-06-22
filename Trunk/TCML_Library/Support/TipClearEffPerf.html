@@ -1,0 +1,156 @@
+<script type="text/javascript"
+     src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+<font size="6" color="Magenta">Tip Clearance Effect on Performance Library Block</font>
+<br>
+<p>This block produces an estimate of the tip clearance impact on the efficiency of the 
+turbomachinery component. It accepts the output structure from a 
+<a href="DynTipClearance.html">Dynamic Tip Clearance</a>
+block, the displacement of a tip clearance actuator (if one exists), and a performance 
+impact coefficient (described later) along with the constant parameters of the degradation 
+gap (described later) and shroud offset distance (described later) to determine the factor 
+by which the efficiency is impacted. The factor can be multiplied by the component 
+efficiency scaler in an engine simulation to achieve the appropriate component efficiency. 
+Therefore, the output is refered to as the efficiency scaler coefficient. The NomConfig_M 
+parameter is 0 (unchecked) by default which assumes that the turbine configuration defined 
+in the 
+<a href="DynTipClearance.html">Dynamic Tip Clearance</a>
+block (material, dimensions, etc.) represent the nominal configuration that correlates to 
+the nominal tip clearance and component performance. If this is not true then the 
+NomConfig_M checkbox can be checked and a new inport will appear that asks for the nominal 
+tip clearance. This nominal tip clearance value will override the nominal tip clearance 
+produced by the 
+<a href="DynTipClearance.html">Dynamic Tip Clearance</a>
+block. Instead the nominal tip clearance should be supplied by a 
+<a href="SSTipClearance.html">Steady-State Tip Clearance</a>
+block whose inputs are the same as the 
+<a href="DynTipClearance.html">Dynamic Tip Clearance</a>
+block but whose parameters are consistent with the nominal turbine configuration. <p>
+
+<p>The block incorpoates to the tip clearance calculation, displacement of the shroud due 
+to an actively controlled actuation system which provides the ability to incorporate such 
+an actuator an its control logic into a simulation. The block also incorporates growth of 
+the tip clearance due to degradation. As the engine operates, the engine blades and shroud 
+slowly erode and deform. Although maintainence can be performed to correct or at least 
+improve this issue, the tip clearance growth can noticeably impact engine performance between 
+engine overhauls. The final tip clearance is<p>
+$$
+TC = TC_{0} + x + q
+$$
+<p>where<p>
+$$
+TC_{0} = tip \: clearance \: from \: the \: Dynamic \: Tip \: Clearance \: block
+$$
+$$
+x = actuator \: displacement
+$$
+$$
+q = tip \: clearance \: growth \: due \: to \: degradation
+$$
+<p>The tip clearance impact on performance is approximated with the following correlation:
+$$
+\frac{\eta}{\eta_{nom}} = 1 - K \left( \frac{TC-TC_{nom}}{L_{blade}} \right) \left( \frac{r_{Shroud,in}}{\frac{1}{2}\left( r_{Rotor,out} + r_{Shroud,in} \right)} \right)
+$$
+<p>where<p>
+$$
+\eta = efficiency \: with \: off-nominal \: tip \: clearance \: effects
+$$
+$$
+\eta_{nom} = nominal \: efficiency
+$$
+$$
+K = the \: performance \: impact \: coefficient
+$$
+$$
+TC = tip \: clearance
+$$
+$$
+TC_{nom} = nominal \: tip \: clearance
+$$
+$$
+L_{Blade} = length \: of \: the \: blade
+$$
+$$
+r_{Shroud,in} = inner \: radius \: of \: the \: shroud
+$$
+$$
+r_{Rotor,out} = outer \: radius \: of \: the \: rotor \: disc
+$$
+<p>and the inner radius of the shroud is
+$$
+r_{Shroud,in} = r_{Case,in} - L_{Shroud}
+$$
+<p>where<p>
+$$
+r_{Case,in} = inner \: radius \: of \: the \: engine \: case
+$$
+$$
+L_{Shroud} = distance \: between \: the \: inner \: surfaces \: of \: the \: shroud \: and \: case.
+$$
+<p>The output of this block is referred to as the efficiency scaler coefficient, and is equivalent
+to ratio of effiencies on the left hand side of the equation above. To obtain the efficiency that 
+incorporates the effects of tip clearance, this value should be multipled by the nominal efficiency. 
+When integrated this block with an engine simulation that uses component map scalers, the map scaler 
+can be multiplied by this value to obtain the new efficiency. This correlation came from the 
+following reference:<p>
+<p>Baskharone, E.A., Principles of Turbomachinery in Air-Breathing Engines, Cambridge University Press, New York City, NY. 2006.
+<p>Also from the reference above is an expression to define the performanc impact coefficient, K:<p>
+$$
+K = 1 + 0.586 \psi_{Z_{tip}}^{3.63}
+$$
+<p>where<p>
+$$
+\psi_{Z_{tip}} = the \: tip \: Zweifel \: loading \: coefficient
+$$
+<p>Alternatively K could be determined through back calculation if data or an empirical correlation
+can be used to capture the impact of varying amounts of tip clearance has on componenet efficiency.
+Note that the nominal tip clearance is defined based on the nominal configuration and 
+operation of the engine and its controls. These values correspond to the nominal engine characteristics 
+and perfromance.<p>
+    
+<p>Pay attention to the unit requirments for the inputs and parameters (masked variables). Also 
+make note of the units of the outputs.<p>
+    
+<br>
+<font size="5" color="Blue">Tip Clearance Effect on Performance Inputs:</font>
+<table border="1"> <tr><td>Tip Clearance Effect on Performance Input</td><td>Description</td></tr>
+    <tr><td>Tip Clearance Output Variables</td><td>the out structure from a Dynamic Tip Clearance block
+            <br>- TC - tip clearance [mils]
+            <br>- TCnom - nominal tip clearance (considering nominal cooling) [mils]
+            <br>- Case
+			<br>---- T - array containing the temperature solution for the engine case [degR]
+			<br>---- Tavg - average temperature of the engine case [degR]
+			<br>---- L - inner radius of the case [ft]
+            <br>---- Lnom - nominal inner radius of the case (considering nominal cooling) [ft]
+			<br>- Blade
+			<br>---- T - temperature of the blade [degR]
+			<br>---- L - length of the blade [ft]
+            <br>---- Lu - unstrained length of the blade (without considering centrifugal expansion) [ft]
+            <br>---- Lnom - nominal length of the blade (considering nominal cooling) [ft]
+			<br>- Rotor
+			<br>---- T - array containing the temperature solution for the rotor disc [degR]
+			<br>---- Tavg - average temperature of the rotor disc [degR]
+			<br>---- L - outer radius of the rotor disc [ft] 
+            <br>---- Lu - unstrained outer radius of the rotor disc (without considering centrifugal expansion) [ft]
+            <br>---- Lnom - nominal outer radius of the rotor disc (considering nominal cooling) [ft]</td></tr>
+	<tr><td>Actuator Displacement, x (mils)</td><td>displacement of the shroud by an active actuation system (positive direction is defined to be toward the blade) [mils]</td></tr>
+	<tr><td>Perfomance Impact Coefficient, K</td><td>the performance impact coefficient [-]</td></tr>
+	<tr><td>Nominal Config. TC (mils)</td><td>steady-state tip clearance of the nominal configuration under nominal operating conditions [mils]</td></tr>
+</table>
+<br>
+<font size="5" color="Blue">Tip Clearance Effect on Performance Outputs:</font>
+<table border="1"> <tr><td>Tip Clearance Effect on Performance Output</td><td>Description</td></tr>
+    <tr><td>Actual Tip Clearance (mils)</td><td>tip clearance with active control and degradation considerations [mils]</td></tr>
+    <tr><td>Efficiency Scaler Coefficient</td><td>modification factor to the component efficiency due to tip clearance effects</td></tr>
+</table>
+<br>
+<font size="5" color="Blue">Tip Clearance Effect on Performance Mask Variables: </font>
+<table border="1"> <tr><td>Tip Clearance Effect on Performance Mask Variable</td><td>Description</td></tr>
+    <tr><td>L_Shroud_M</td><td>distance between the inner surface of the shroud and the inner surface of the engine case [ft]</td></tr>
+    <tr><td>DegGap_M</td><td>the increase in the tip clearance gap due to degradation [mils]</td></tr>
+    <tr><td>NomConfig_M</td><td>nominal configuration option. When the option is inactive (unchecked), the block assumes that the nominal tip clearance supplied by the output structure of the connected Dynamic Tip Clearance block is representative of the nominal configuration and operation of the engine. When this option is active (checked) the nominal tip clearance is supplied through an external inport from a Steady-State Tip Clearance block that is representative of the nominal configuration and operation of the engine.</td></tr>
+</table>
+<br>
+
+

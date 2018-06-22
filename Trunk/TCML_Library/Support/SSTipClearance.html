@@ -1,0 +1,201 @@
+<script type="text/javascript"
+     src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+<font size="6" color="Magenta">Steady-State Tip Clearance Library Block</font>
+<br>
+<p>This block produces the steady-state tip clearance inside turobmachinery for a given 
+operating condition. That is to say that it provides the tip clearance and relavant 
+temperatures and lengths of components once all dynamics have resided. This block is useful 
+for initializing the 
+<a href="DynTipClearance.html">Dynamic Tip Clearance</a> 
+block. It is also useful for evaluating steady-state tip clearance and engine performance 
+impact on-the-fly. When evaluating performance impact using the 
+<a href="TipClearEffPerf.html">Tip Clearance Effect on Performance</a> 
+block for an "off-nominal" turbine conguration (configuration refers to the combination of
+dimensions, materials, etc. that define the turbine), this block should be used to define the 
+nominal tip clearance that is fed into the 
+<a href="TipClearEffPerf.html">Tip Clearance Effect on Performance</a> 
+block. In this case, the inputs of the Steady-State Tip Clearance block should be the 
+same as the 
+<a href="DynTipClearance.html">Dynamic Tip Clearance</a> 
+block, but the block parameters should reflect the nominal turbine design.
+
+<p>This function approximates axisymmetric tip clearance variation inside turbomachinery 
+(i.e. compressors and turbines). It models the deformation of the rotor disc, blade, and engine casing/shroud 
+(containment structure) due to elastic thermal and centrifugal deformation. The blade is 
+modeled as a lumped mass and the rotor disc and engine casing use a 1-D finite difference approach for 
+temperature determination. The shroud is assumed to be offset from the engine casing by a fixed
+distance. Since the engine casing provides the structural support for the shroud, the shroud 
+displacement is based on the engine casing deformation. The thermal deformation models use the 
+average component temperature. 
+This function has numerous options for modeling convective heat transfer coefficients and 
+temperature dependence of various parameters including thermal conductivity, heat capacity, 
+thermal expansion coefficient, Young's Modulus, and Poisson's ratio. If temperature dependent 
+thermal properties are specified then the average temperature of the component is calculated, 
+the thermal property is chosen based on the average temperature, the steady-state solution is 
+evaluated with this constant thermal property value, and the solution is iterated on until it 
+converges.<p>
+
+<p>Centrifugual deformations are based on static equations which require no additional consideration 
+to get a steady-state solution. However, the thermal deformation is dependent on temperature which 
+is governed by differential equations. The theoretical steady-state solution is evaluated for each 
+of the components. In the case of the blade the steady-state blade temperature is equal to the 
+reference temperature which is between the core flow temperature and temperature of the blades cooling 
+flow. The value of the reference temperature is dependent on the film cooling coefficient. An expression 
+for the reference temperature is given in 
+<a href="DynTipClearance.html">Dynamic Tip Clearance</a>.
+The rotor is modeled as a 1-D planar slab and the engine casing is modeled as an infinite cylindrical shell. 
+Theoretical solutions based on a lumped thermal resistance model can be found in text books and other 
+resources. <p>
+
+<p>All inputs and parameters (masked variables) are in standard English units. The units are indicated 
+in the tables below as well as the block cover and dialog box. Outputs are in standard English units 
+with the exception of the tip clearance which is in mils (1mil = 0.001in).<p>
+    
+<p>Given this block is a steady-state version of the
+<a href="DynTipClearance.html">Dynamic Tip Clearance</a> 
+block, it's help menu can be referred to for various details.<p>
+
+<br>
+<font size="5" color="Blue">Dynamic Tip Clearance Inputs:</font>
+<table border="1"> <tr><td>Tip Clearance Input</td><td>Description</td></tr>
+    <tr><td>Nmech</td><td>shaft speed [rpm]</td></tr>
+	<tr><td>Tcore - Blade</td><td>temperature of the flow inside the core that is exposed to the blade (neglecting film cooling) [degR]</td></tr>
+	<tr><td>Tcool - Blade</td><td>temperature of the flow used for film cooling [degR]</td></tr>
+	<tr><td>Tcool - Rotor Front</td><td>temperature of the flow used to cool the front of the rotor disc [degR]</td></tr>
+	<tr><td>Wcool - Rotor Front</td><td>mass flow rate of the flow used to cool the front of the rotor disc [slug/sec]</td></tr>
+	<tr><td>Tcool - Rotor Back</td><td>temperature of the flow used to cool the back of the rotor disc [degR]</td></tr>
+	<tr><td>Wcool - Rotor Back</td><td>mass flow rate of the flow used to cool the back of the rotor disc [slug/sec]</td></tr>
+	<tr><td>Tin - Case</td><td>temperature of the flow on the inner surface of the engine case [degR]</td></tr>
+    <tr><td>Win - Case</td><td>mass flow rate of the flow used to cool the inner surface of the engine case [slug/sec]</td></tr>
+    <tr><td>Tout - Case</td><td>temperature of the flow on the outer surface of the engine case [degR]</td></tr>
+    <tr><td>Wout - Case</td><td>mass flow rate of the flow used to cool the outer surface of the engine case [slug/sec]</td></tr>
+	<tr><td>Wout Nom - Case</td><td>nominal mass flow rate of the flow used to cool the outer surface of the engine case (defined by the nominal cooling schedule) [slug/sec]</td></tr>
+</table>
+<br>
+<font size="5" color="Blue">Dynamic Tip Clearance Outputs:</font>
+<table border="1"> <tr><td>Tip Clearance Output</td><td>Description</td></tr>
+    <tr><td>Out</td><td>Tip Clearance Output, structure consisting of 1 variable and 3 substructions:
+            <br>- TC - tip clearance [mils]
+            <br>- TCnom - nominal tip clearance (considering nominal cooling) [mils]
+            <br>- Case
+			<br>---- T - array containing the temperature solution for the engine case [degR]
+			<br>---- Tavg - average temperature of the engine case [degR]
+			<br>---- L - inner radius of the case [ft]
+            <br>---- Lnom - nominal inner radius of the case (considering nominal cooling) [ft]
+			<br>- Blade
+			<br>---- T - temperature of the blade [degR]
+			<br>---- L - length of the blade [ft]
+            <br>---- Lu - unstrained length of the blade (without considering centrifugal expansion) [ft]
+			<br>- Rotor
+			<br>---- T - array containing the temperature solution for the rotor disc [degR]
+			<br>---- Tavg - average temperature of the rotor disc [degR]
+			<br>---- L - outer radius of the rotor disc [ft] 
+            <br>---- Lu - unstrained outer radius of the rotor disc (without considering centrifugal expansion) [ft]
+</table>
+<br>
+<font size="5" color="Blue">Dynamic Tip Clearance Mask Variables: </font>
+<table border="1"> <tr><td>Turbine Mask Variable</td><td>Description</td></tr>
+	<tr><td>eta_Blade_M</td><td>film cooling coefficient for cooling of the blade [frac]</td></tr>
+	<tr><td>T0_Blade_M</td><td>initial temperature of the blade [degR]</td></tr>
+	<tr><td>dt_Blade_M</td><td>time-step for solving for the blade temperature state and sampling time of the blocks involved with this calculation [sec]</td></tr>
+	<tr><td>h_Const_Blade_M</td><td>check to use the constant h_Blade_M as the convective heat transfer coefficient for the blade</td></tr>
+	<tr><td>h_Eqn_Blade_M</td><td>check to use the equation h = hcoeff*(T/Tdes)^0.23*(W/Wdes)^0.8 to determine the convective heat transfer coefficient for the blade</td></tr>
+	<tr><td>h_Data_Blade_M</td><td>check to use the data arrays Wc_Blade_Data_M, Tc_Blade_Data_M, and h_Blade_Data_M to interpolate the convective heat transfer coefficient for the blade</td></tr>
+	<tr><td>h_Blade_M</td><td> constant convective heat transfer coefficient for the blade [Btu/(sec-ft^2-degR)]</td></tr>
+	<tr><td>hcoeff_Blade_M</td><td> coefficient in the equation h = hcoeff*(T/Tdes)^0.23*(W/Wdes)^0.8 used to evaluate the convective heat transfer coefficient for the blade [Btu/(sec-ft^2-degR)]</td></tr>
+	<tr><td>Wdes_Blade_M</td><td> mass flow rate at a design point (known point) used to normalize the mass flow rate in the convective heat transfer coefficient model for the blade [slug/sec]</td></tr>
+	<tr><td>Tdes_Blade_M</td><td> temperature at a design point (known point) used to normalize the temperature in the convective heat transfer coefficient model for the blade [degR]</td></tr>
+	<tr><td>Wc_Blade_Data_M</td><td> Non-dimensional mass flow rate (W/Wdes) array used in interpolating the convective heat transfer coefficient for the blade [-] (bx1)</td></tr>
+	<tr><td>Tc_Blade_Data_M</td><td> Non-dimensional temperature (T/Tdes) array used in interpolating the convective heat transfer coefficient for the blade [-] (cx1) </td></tr>
+	<tr><td>h_Blade_Data_M</td><td> Matrix of convective heat transfer coefficients for the blade  rows corresponding to Wc_Blade_Data_M and columns corresponding to Tc_Blade_Data_M [Btu/(sec-ft^2-degR)] (bxc)</td></tr>
+	<tr><td>L_Blade_M</td><td>length of the blade [ft]</td></tr>
+	<tr><td>rho_Blade_M</td><td>density of the blade [slug/ft^3]</td></tr>
+	<tr><td>alpha_TempDependence_Blade_M</td><td>temperature dependence of the thermal expansion coefficient of the blade. When unchecked the constant thermal expansion coefficient alpha_Blade_M is used and when checked the thermal expansion coefficient is interpolated each time-step based on temperature and thermal expansion coefficient data given by Talpha_Blade_Data_M and alpha_Blade_Data_M</td></tr>
+	<tr><td>alpha_Blade_M</td><td>constant thermal expansion coefficient for the blade [1/degR)]</td></tr>
+	<tr><td>Talpha_Blade_Data_M</td><td>temperature array for interpolating the thermal expansion coefficient of the blade [degR] (dx1)</td></tr>
+	<tr><td>alpha_Blade_Data_M</td><td>thermal expansion coefficient array correspondeing to Talpha_Blade_Data_M for interpolating the thermal expansion coefficient of the blade [1/degR] (dx1)</td></tr>
+	<tr><td>E_TempDependence_Blade_M</td><td>temperature dependence of Young's Modulus of the blade. When unchecked the constant Young's Modulus E_Blade_M is used and when checked Young's Modulus is interpolated each time-step based on temperature and Young's Modulus data given by TE_Blade_Data_M and E_Blade_Data_M</td></tr>
+	<tr><td>E_Blade_M</td><td>constant Young's Modulus for the blade [lbf/ft^2]</td></tr>
+	<tr><td>TE_Blade_Data_M</td><td>temperature array for interpolating Young's Modulus of the blade [degR] (ex1)</td></tr>
+	<tr><td>E_Blade_Data_M</td><td>Young's Modulus array correspondeing to TE_Blade_Data_M for interpolating Young's Modulus of the blade [lbf/ft^2] (ex1)</td></tr>
+	<tr><td>W_Rotor_M</td><td>width of the rotor from front to back [ft]</td></tr>
+	<tr><td>n_Rotor_M</td><td>number of nodes in the spatial discretization of the rotor</td></tr>
+	<tr><td>T0_Rotor_M</td><td>initial temperatures array for the rotor [degR] (n_Rotor_Mx1)</td></tr>
+	<tr><td>rho_Rotor_M</td><td>density of the rotor [slug/ft^3]</td></tr>
+	<tr><td>k_TempDependence_Rotor_M</td><td>temperature dependence of the thermal conductivity of the rotor. When unchecked the constant thermal conductivity k_Rotor_M is used and when checked the thermal conductivity is interpolated each time-step based on temperature and thermal conductivity data given by Tk_Rotor_Data_M and k_Rotor_Data_M</td></tr>
+	<tr><td>k_Rotor_M</td><td>constant thermal conductivity for the rotor [Btu/(sec-ft-degR)]</td></tr>
+	<tr><td>Tk_Rotor_Data_M</td><td>temperature array for interpolating the thermal conductivity of the rotor [degR] (fx1)</td></tr>
+	<tr><td>k_Rotor_Data_M</td><td>thermal conductivity array correspondeing to Tk_Rotor_Data_M for interpolating the thermal conductivity of the rotor [Btu/(sec-ft-degR)] (fx1)</td></tr>
+	<tr><td>h_Const_Rotor_Front_M</td><td>check to use the constant h_Rotor_Front_M as the convective heat transfer coefficient for the front surface of the rotor</td></tr>
+	<tr><td>h_Eqn_Rotor_Front_M</td><td>check to use the equation h = hcoeff*(T/Tdes)^0.23*(W/Wdes)^0.8 to determine the convective heat transfer coefficient for the front surface of the rotor</td></tr>
+	<tr><td>h_Data_Rotor_Front_M</td><td>check to use the data arrays Wc_Rotor_Front_Data_M, Tc_Rotor_Front_Data_M, and h_Rotor_Front_Data_M to interpolate the convective heat transfer coefficient for the front surface of the rotor</td></tr>
+	<tr><td>h_Rotor_Front_M</td><td> constant convective heat transfer coefficient for the front surface of the rotor [Btu/(sec-ft^2-degR)]</td></tr>
+	<tr><td>hcoeff_Rotor_Front_M</td><td> coefficient in the equation h = hcoeff*(T/Tdes)^0.23*(W/Wdes)^0.8 used to evaluate the convective heat transfer coefficient for the front surface of the rotor [Btu/(sec-ft^2-degR)]</td></tr>
+	<tr><td>Wdes_Rotor_Front_M</td><td> mass flow rate at a design point (known point) used to normalize the mass flow rate in the convective heat transfer coefficient model for the front surface of the rotor [slug/sec]</td></tr>
+	<tr><td>Tdes_Rotor_Front_M</td><td> temperature at a design point (known point) used to normalize the temperature in the convective heat transfer coefficient model for the front surface of the rotor [degR]</td></tr>
+	<tr><td>Wc_Rotor_Front_Data_M</td><td> Non-dimensional mass flow rate (W/Wdes) array used in interpolating the convective heat transfer coefficient for the front surface of the rotor [-] (hx1)</td></tr>
+	<tr><td>Tc_Rotor_Front_Data_M</td><td> Non-dimensional temperature (T/Tdes) array used in interpolating the convective heat transfer coefficient for the front surface of the rotor [-] (ix1) </td></tr>
+	<tr><td>h_Rotor_Front_Data_M</td><td> Matrix of convective heat transfer coefficients for the front surface of the rotor with rows corresponding to Wc_Rotor_Front_Data_M and columns corresponding to Tc_Rotor_Front_Data_M [Btu/(sec-ft^2-degR)] (hxi)</td></tr>
+	<tr><td>h_Const_Rotor_Back_M</td><td>check to use the constant h_Rotor_Front_M as the convective heat transfer coefficient for the back surface of the rotor</td></tr>
+	<tr><td>h_Eqn_Rotor_Back_M</td><td>check to use the equation h = hcoeff*(T/Tdes)^0.23*(W/Wdes)^0.8 to determine the convective heat transfer coefficient for the back surface of the rotor</td></tr>
+	<tr><td>h_Data_Rotor_Back_M</td><td>check to use the data arrays Wc_Rotor_Front_Data_M, Tc_Rotor_Front_Data_M, and h_Rotor_Front_Data_M to interpolate the convective heat transfer coefficient for the back surface of the rotor</td></tr>
+	<tr><td>h_Rotor_Back_M</td><td> constant convective heat transfer coefficient for the back surface of the rotor [Btu/(sec-ft^2-degR)]</td></tr>
+	<tr><td>hcoeff_Rotor_Back_M</td><td> coefficient in the equation h = hcoeff*(T/Tdes)^0.23*(W/Wdes)^0.8 used to evaluate the convective heat transfer coefficient for the back surface of the rotor [Btu/(sec-ft^2-degR)]</td></tr>
+	<tr><td>Wdes_Rotor_Back_M</td><td> mass flow rate at a design point (known point) used to normalize the mass flow rate in the convective heat transfer coefficient model for the back surface of the rotor [slug/sec]</td></tr>
+	<tr><td>Tdes_Rotor_Back_M</td><td> temperature at a design point (known point) used to normalize the temperature in the convective heat transfer coefficient model for the back surface of the rotor [degR]</td></tr>
+	<tr><td>Wc_Rotor_Back_Data_M</td><td> Non-dimensional mass flow rate (W/Wdes) array used in interpolating the convective heat transfer coefficient for the back surface of the rotor [-] (jx1)</td></tr>
+	<tr><td>Tc_Rotor_Back_Data_M</td><td> Non-dimensional temperature (T/Tdes) array used in interpolating the convective heat transfer coefficient for the back surface of the rotor [-] (kx1) </td></tr>
+	<tr><td>h_Rotor_Back_Data_M</td><td> Matrix of convective heat transfer coefficients for the back surface of the rotor with rows corresponding to Wc_Rotor_Front_Data_M and columns corresponding to Tc_Rotor_Front_Data_M [Btu/(sec-ft^2-degR)] (jxk)</td></tr>
+	<tr><td>Ro_Rotor_M</td><td>outer radius of the rotor [ft]</td></tr>
+	<tr><td>alpha_TempDependence_Rotor_M</td><td>temperature dependence of the thermal expansion coefficient of the rotor. When unchecked the constant thermal expansion coefficient alpha_Rotor_M is used and when checked the thermal expansion coefficient is interpolated each time-step based on temperature and thermal expansion coefficient data given by Talpha_Rotor_Data_M and alpha_Rotor_Data_M</td></tr>
+	<tr><td>alpha_Rotor_M</td><td>constant thermal expansion coefficient for the rotor [1/degR)]</td></tr>
+	<tr><td>Talpha_Rotor_Data_M</td><td>temperature array for interpolating the thermal expansion coefficient of the rotor [degR] (lx1)</td></tr>
+	<tr><td>alpha_Rotor_Data_M</td><td>thermal expansion coefficient array correspondeing to Talpha_Rotor_Data_M for interpolating the thermal expansion coefficient of the rotor [1/degR] (lx1)</td></tr>
+	<tr><td>E_TempDependence_Rotor_M</td><td>temperature dependence of Young's Modulus of the rotor. When unchecked the constant Young's Modulus E_Rotor_M is used and when checked Young's Modulus is interpolated each time-step based on temperature and Young's Modulus data given by TE_Rotor_Data_M and E_Rotor_Data_M</td></tr>
+	<tr><td>E_Rotor_M</td><td>constant Young's Modulus for the rotor [lbf/ft^2]</td></tr>
+	<tr><td>TE_Rotor_Data_M</td><td>temperature array for interpolating Young's Modulus of the rotor [degR] (mx1)</td></tr>
+	<tr><td>E_Rotor_Data_M</td><td>Young's Modulus array correspondeing to TE_Rotor_Data_M for interpolating Young's Modulus of the rotor [lbf/ft^2] (mx1)</td></tr>
+	<tr><td>v_TempDependence_Rotor_M</td><td>temperature dependence of Poisson's ratio of the rotor. When unchecked the constant Poisson's ratio v_Rotor_M is used and when checked Poisson's ratio is interpolated each time-step based on temperature and Poisson's ratio data given by Tv_Rotor_Data_M and v_Rotor_Data_M</td></tr>
+	<tr><td>v_Rotor_M</td><td>constant Young's Modulus for the rotor [-]</td></tr>
+	<tr><td>Tv_Rotor_Data_M</td><td>temperature array for interpolating Poisson's ratio of the rotor [degR] (nx1)</td></tr>
+	<tr><td>v_Rotor_Data_M</td><td>Poisson's ratio array correspondeing to Tv_Rotor_Data_M for interpolating Poisson's ratio of the rotor [-] (nx1)</td></tr>'
+	<tr><td>W_Case_M</td><td>width of the engine case [ft]</td></tr>
+	<tr><td>n_Case_M</td><td>number of nodes in the spatial discretization of the engine case</td></tr>
+	<tr><td>T0_Case_M</td><td>initial temperatures array for the engine case [degR] (n_Case_Mx1)</td></tr>
+    <tr><td>rho_Case_M</td><td>density of the engine case [slug/ft^3]</td></tr>
+	<tr><td>k_TempDependence_Case_M</td><td>temperature dependence of the thermal conductivity of the engine case. When unchecked the constant thermal conductivity k_Case_M is used and when checked the thermal conductivity is interpolated each time-step based on temperature and thermal conductivity data given by Tk_Case_Data_M and k_Case_Data_M</td></tr>
+	<tr><td>k_Case_M</td><td>constant thermal conductivity for the engine case [Btu/(sec-ft-degR)]</td></tr>
+	<tr><td>Tk_Case_Data_M</td><td>temperature array for interpolating the thermal conductivity of the enigne case [degR] (ox1)</td></tr>
+	<tr><td>k_Case_Data_M</td><td>thermal conductivity array correspondeing to Tk_Case_Data_M for interpolating the thermal conductivity of the engine case [Btu/(sec-ft-degR)] (ox1)</td></tr>
+	<tr><td>h_Const_Case_In_M</td><td>check to use the constant h_Case_In_M as the convective heat transfer coefficient for the inner surface of the engine case</td></tr>
+	<tr><td>h_Eqn_Case_In_M</td><td>check to use the equation h = hcoeff*(T/Tdes)^0.23*(W/Wdes)^0.8 to determine the convective heat transfer coefficient for the inner surface of the engine case</td></tr>
+	<tr><td>h_Data_Case_In_M</td><td>check to use the data arrays Wc_Case_In_Data_M, Tc_Case_In_Data_M, and h_Case_In_Data_M to interpolate the convective heat transfer coefficient for the inner surface of the engine case</td></tr>
+	<tr><td>h_Case_In_M</td><td> constant convective heat transfer coefficient for the inner surface of the engine case [Btu/(sec-ft^2-degR)]</td></tr>
+	<tr><td>hcoeff_Case_In_M</td><td> coefficient in the equation h = hcoeff*(T/Tdes)^0.23*(W/Wdes)^0.8 used to evaluate the convective heat transfer coefficient for the inner surface of the engine case [Btu/(sec-ft^2-degR)]</td></tr>
+	<tr><td>Wdes_Case_In_M</td><td> mass flow rate at a design point (known point) used to normalize the mass flow rate in the convective heat transfer coefficient model for the inner surface of the engine case [slug/sec]</td></tr>
+	<tr><td>Tdes_Case_In_M</td><td> temperature at a design point (known point) used to normalize the temperature in the convective heat transfer coefficient model for inner surface of the engine case [degR]</td></tr>
+	<tr><td>Wc_Case_In_Data_M</td><td> Non-dimensional mass flow rate (W/Wdes) array used in interpolating the convective heat transfer coefficient for the inner surface of the engine case [-] (sx1)</td></tr>
+	<tr><td>Tc_Case_In_Data_M</td><td> Non-dimensional temperature (T/Tdes) array used in interpolating the convective heat transfer coefficient for the inner surface of the engine case [-] (tx1) </td></tr>
+	<tr><td>h_Case_In_Data_M</td><td> Matrix of convective heat transfer coefficients for the inner surface of the engine case with rows corresponding to Wc_Case_In_Data_M and columns corresponding to Tc_Case_In_Data_M [Btu/(sec-ft^2-degR)] (sxt)</td></tr>
+	<tr><td>h_Const_Case_Out_M</td><td>check to use the constant h_Case_Out_M as the convective heat transfer coefficient for the outer surface of the engine case</td></tr>
+	<tr><td>h_Eqn_Case_Out_M</td><td>check to use the equation h = hcoeff*(T/Tdes)^0.23*(W/Wdes)^0.8 to determine the convective heat transfer coefficient for the outer surface of the engine case</td></tr>
+	<tr><td>h_Data_Case_Out_M</td><td>check to use the data arrays Wc_Case_Out_Data_M, Tc_Case_Out_Data_M, and h_Case_In_Data_M to interpolate the convective heat transfer coefficient for the outer surface of the engine case</td></tr>
+	<tr><td>h_Case_Out_M</td><td> constant convective heat transfer coefficient for the outer surface of the engine case [Btu/(sec-ft^2-degR)]</td></tr>
+	<tr><td>hcoeff_Case_Out_M</td><td> coefficient in the equation h = hcoeff*(T/Tdes)^0.23*(W/Wdes)^0.8 used to evaluate the convective heat transfer coefficient for the outer surface of the engine case [Btu/(sec-ft^2-degR)]</td></tr>
+	<tr><td>Wdes_Case_Out_M</td><td> mass flow rate at a design point (known point) used to normalize the mass flow rate in the convective heat transfer coefficient model for the outer surface of the engine case [slug/sec]</td></tr>
+	<tr><td>Tdes_Case_Out_M</td><td> temperature at a design point (known point) used to normalize the temperature in the convective heat transfer coefficient model for outer surface of the engine case [degR]</td></tr>
+	<tr><td>Wc_Case_Out_Data_M</td><td> Non-dimensional mass flow rate (W/Wdes) array used in interpolating the convective heat transfer coefficient for the outer surface of the engine case [-] (ux1)</td></tr>
+	<tr><td>Tc_Case_Out_Data_M</td><td> Non-dimensional temperature (T/Tdes) array used in interpolating the convective heat transfer coefficient for the outer surface of the engine case [-] (vx1) </td></tr>
+	<tr><td>h_Case_Out_Data_M</td><td> Matrix of convective heat transfer coefficients for the outer surface of the engine case with rows corresponding to Wc_Case_Out_Data_M and columns corresponding to Tc_Case_Out_Data_M [Btu/(sec-ft^2-degR)] (uxv)</td></tr>
+	<tr><td>Ri_Case_M</td><td>inner radius of the structural layer of the engine case [ft]</td></tr>
+	<tr><td>L_Shroud_M</td><td>Distance between the inner surface of the shroud and the inner surface of the engine case [ft]</td></tr>
+    <tr><td>alpha_TempDependence_Case_M</td><td>temperature dependence of the thermal expansion coefficient of the structural layer of the engine case. When unchecked the constant thermal expansion coefficient alpha_Case_M is used and when checked the thermal expansion coefficient is interpolated each time-step based on temperature and thermal expansion coefficient data given by Talpha_Case_Data_M and alpha_Case_Data_M</td></tr>
+	<tr><td>alpha_Case_M</td><td>constant thermal expansion coefficient for the engine case [1/degR)]</td></tr>
+	<tr><td>Talpha_Case_Data_M</td><td>temperature array for interpolating the thermal expansion coefficient of the engine case [degR] (wx1)</td></tr>
+	<tr><td>alpha_Case_Data_M</td><td>thermal expansion coefficient array correspondeing to Talpha_Case_Data_M for interpolating the thermal expansion coefficient of the engine case [1/degR] (wx1)</td></tr>
+</table>
+<br>
+
+
